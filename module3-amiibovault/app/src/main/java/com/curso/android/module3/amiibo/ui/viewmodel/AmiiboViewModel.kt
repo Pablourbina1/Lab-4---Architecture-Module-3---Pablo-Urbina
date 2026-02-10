@@ -276,14 +276,12 @@ class AmiiboViewModel(
         viewModelScope.launch {
             amiibosFromDb.collect { amiibos ->
                 // Solo actualiza a Success si hay datos o no estamos en Loading inicial
-                val currentState = _uiState.value
-                if (amiibos.isNotEmpty()) {
-                    _uiState.value = AmiiboUiState.Success(
-                        amiibos = amiibos,
-                        isRefreshing = currentState is AmiiboUiState.Success &&
-                                (currentState as? AmiiboUiState.Success)?.isRefreshing == true
-                    )
-                }
+                _uiState.value = AmiiboUiState.Success(
+                    amiibos = amiibos,
+                    isRefreshing = false
+                )
+
+
             }
         }
     }
