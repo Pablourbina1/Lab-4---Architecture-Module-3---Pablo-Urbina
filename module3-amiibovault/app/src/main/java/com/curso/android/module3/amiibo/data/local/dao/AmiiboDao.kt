@@ -187,6 +187,10 @@ interface AmiiboDao {
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDetail(detail: AmiiboDetailEntity)
+
+    // Para la lista de amiibos
+    @Query("SELECT * FROM amiibos WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
+    fun searchAmiibos(query: String): Flow<List<AmiiboEntity>>
 }
 
 /**
