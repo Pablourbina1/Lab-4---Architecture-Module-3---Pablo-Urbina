@@ -456,12 +456,17 @@ class AmiiboViewModel(
                     is AmiiboError.Unknown -> true   // Vale la pena reintentar
                 }
 
-                _uiState.value = AmiiboUiState.Error(
-                    message = e.message,
-                    errorType = errorType,
-                    isRetryable = isRetryable,
-                    cachedAmiibos = cachedAmiibos
-                )
+                if (cachedAmiibos.isEmpty()) {
+                    _uiState.value = AmiiboUiState.Error(
+                        message = e.message,
+                        errorType = errorType,
+                        isRetryable = isRetryable,
+                        cachedAmiibos = cachedAmiibos )
+                } else {
+                    _uiState.value = AmiiboUiState.Success(
+                        amiibos = cachedAmiibos,
+                        isRefreshing = false )
+                }
             } catch (e: Exception) {
                 // Catch-all para errores no tipados (no debería llegar aquí)
                 val cachedAmiibos = _loadedAmiibos.value
