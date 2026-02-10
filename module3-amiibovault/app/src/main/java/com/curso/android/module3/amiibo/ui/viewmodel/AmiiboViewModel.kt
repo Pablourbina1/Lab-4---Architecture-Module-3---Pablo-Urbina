@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -217,6 +218,16 @@ class AmiiboViewModel(
     /** Opciones de tamaño de página disponibles */
     val pageSizeOptions: List<Int> = AmiiboRepository.PAGE_SIZE_OPTIONS
 
+    // Flow para searchAmiibos
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
+
+
+
     /**
      * Flow de amiibos desde la base de datos.
      *
@@ -226,8 +237,14 @@ class AmiiboViewModel(
      *   de que el último suscriptor se va (optimización para rotación)
      * - emptyList(): Valor inicial mientras se carga
      */
-    private val amiibosFromDb: StateFlow<List<AmiiboEntity>> = repository
-        .observeAmiibos()
+    private val amiibosFromDb: StateFlow<List<AmiiboEntity>> = _searchQuery
+        .flatMapLatest { query ->
+            if (query.isBlank()) {
+                repository.observeAmiibos()
+            } else {
+                repository.searchAmiibos(query)
+            }
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -404,14 +421,17 @@ class AmiiboViewModel(
     fun refreshAmiibos() {
         viewModelScope.launch {
             // Determinar estado durante la carga
+            val dataFromRoom = amiibosFromDb.value
             val currentAmiibos = _loadedAmiibos.value
-            if (currentAmiibos.isEmpty()) {
-                // No hay cache, mostrar loading
+
+            // Si no hay datos en ninguno de los dos, mostrar Loading
+            if (dataFromRoom.isEmpty() && currentAmiibos.isEmpty()) {
                 _uiState.value = AmiiboUiState.Loading
             } else {
-                // Hay cache, mostrar datos con indicador de refresh
+                // Hay datos, mostrar con isRefreshing
+                val amiibosList = if (dataFromRoom.isNotEmpty()) dataFromRoom else currentAmiibos
                 _uiState.value = AmiiboUiState.Success(
-                    amiibos = currentAmiibos,
+                    amiibos = amiibosList,
                     isRefreshing = true
                 )
             }
@@ -445,7 +465,11 @@ class AmiiboViewModel(
                  * - Si es del servidor (Parse) → esperar y reintentar después
                  * - Si es local (Database) → reiniciar app o liberar espacio
                  */
-                val cachedAmiibos = _loadedAmiibos.value
+                val cachedAmiibos = if (amiibosFromDb.value.isNotEmpty()) {
+                    amiibosFromDb.value
+                } else {
+                    _loadedAmiibos.value
+                }
                 val errorType = ErrorType.from(e)
 
                 // Determinar si el error es recuperable con un reintento
@@ -463,7 +487,11 @@ class AmiiboViewModel(
                         cachedAmiibos = cachedAmiibos )
             } catch (e: Exception) {
                 // Catch-all para errores no tipados (no debería llegar aquí)
-                val cachedAmiibos = _loadedAmiibos.value
+                val cachedAmiibos = if (amiibosFromDb.value.isNotEmpty()) {
+                    amiibosFromDb.value
+                } else {
+                    _loadedAmiibos.value
+                }
                 _uiState.value = AmiiboUiState.Error(
                     message = e.message ?: "Error desconocido al cargar datos",
                     errorType = ErrorType.UNKNOWN,
