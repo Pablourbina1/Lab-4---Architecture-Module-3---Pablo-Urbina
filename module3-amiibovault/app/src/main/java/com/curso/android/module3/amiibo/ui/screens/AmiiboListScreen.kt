@@ -377,7 +377,8 @@ fun AmiiboListScreen(
                         LaunchedEffect(state.message) {
                             val result = snackbar.showSnackbar(
                                 message = state.message,
-                                actionLabel = if (state.isRetryable) "Reintentar" else null
+                                actionLabel = if (state.isRetryable) "Reintentar" else null ,
+                                withDismissAction = true
                             )
                             // Si presiona "Reintentar", llamar al ViewModel
                             if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
