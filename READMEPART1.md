@@ -3,6 +3,7 @@
 #### Link del video de explicación: https://drive.google.com/file/d/1CEo-U4xcDtG_bpDZqjHlLl-svyAg9j3q/view?usp=drive_link
 En esta parte se modifico el proyecto para que el programa guarde datos de la API en el caché si fueron cargados previamente al tener conexión de internet.
 Tambien se modifico para que el programa fuera capaz de mostrar los datos guardados en el caché en caso de que no hubiera conexión a internet.
+## Definition of Done
 | Criterio                          | Descripción                                                                |
 | --------------------------------- | -------------------------------------------------------------------------- |
 | Estado de la UI actualizado       | El estado de error acepta el opcional: `List<Amiibo>?`                |
@@ -13,4 +14,4 @@ Tambien se modifico para que el programa fuera capaz de mostrar los datos guarda
 | Reintentar disponible             | El Snackbar tiene un botón de acción "Reintentar"                          |
 | Descartar funciona                | El Snackbar puede ser descartado sin afectar la cuadrícula                 |
 
-## Definition of Done
+
