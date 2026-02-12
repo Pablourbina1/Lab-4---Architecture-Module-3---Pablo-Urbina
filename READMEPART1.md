@@ -1,6 +1,6 @@
 # Graceful Offline Mode
 ## Parte 1 del laboratorio
-### Link del video de explicación: 
+#### Link del video de explicación: https://drive.google.com/file/d/1CEo-U4xcDtG_bpDZqjHlLl-svyAg9j3q/view?usp=drive_link
 En esta parte se modifico el proyecto para que el programa guarde datos de la API en el caché si fueron cargados previamente al tener conexión de internet.
 Tambien se modifico para que el programa fuera capaz de mostrar los datos guardados en el caché en caso de que no hubiera conexión a internet.
 | Criterio                          | Descripción                                                                |
